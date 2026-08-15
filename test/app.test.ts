@@ -5,8 +5,14 @@ import { createApp } from "../src/app.js";
 import { loadServiceConfig } from "../src/config/service-config.js";
 import { ErrorCode } from "../src/enums/error-code.enum.js";
 
+const testEnvironment: NodeJS.ProcessEnv = {
+  NODE_ENV: "test",
+  MONGODB_URI: "mongodb://localhost:27017",
+  MONGODB_DATABASE: "foodpulse_restaurant_test",
+};
+
 test("health and error responses use the common API contract", async (context) => {
-  const config = loadServiceConfig();
+  const config = loadServiceConfig(testEnvironment);
   const server = createApp(config).listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
   context.after(() => new Promise<void>((resolve, reject) => {

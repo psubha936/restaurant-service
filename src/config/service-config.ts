@@ -3,11 +3,23 @@ export const DEFAULT_PORT = 8082;
 
 export type NodeEnvironment = "development" | "test" | "production";
 
+export interface MongoConfig {
+  uri: string;
+  databaseName: string;
+}
+
 export interface ServiceConfig {
   serviceName: typeof SERVICE_NAME;
   nodeEnv: NodeEnvironment;
   host: string;
   port: number;
+  mongodb: MongoConfig;
+}
+
+function requireValue(environment: NodeJS.ProcessEnv, key: string): string {
+  const value = environment[key]?.trim();
+  if (!value) throw new Error(`${key} is required`);
+  return value;
 }
 
 function parseNodeEnvironment(value: string | undefined): NodeEnvironment {
@@ -36,5 +48,9 @@ export function loadServiceConfig(
     nodeEnv: parseNodeEnvironment(environment.NODE_ENV),
     host: environment.HOST?.trim() || "0.0.0.0",
     port: parsePort(environment.PORT),
+    mongodb: {
+      uri: requireValue(environment, "MONGODB_URI"),
+      databaseName: requireValue(environment, "MONGODB_DATABASE"),
+    },
   };
 }
